@@ -70,13 +70,14 @@
     
     //Action
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
-    
+ 
+    //这个方法是专门对UI类做的 block中返回了 button所要执行的操作
     [button setRac_command:[[RACCommand alloc] initWithEnabled:nil signalBlock:^RACSignal * _Nonnull(id  _Nullable input) {
         return [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
-            
+            //subscriber 就是订阅者本身 在此处就是self 而且可以传递
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [subscriber sendNext:[[NSDate date] description]];
-                
+                //此处调用 sendCompleted的原因：有可能此处的调用是异步的
                 [subscriber sendCompleted];
             });
             
@@ -89,6 +90,7 @@
     
     [[[button rac_command] executionSignals] subscribeNext:^(RACSignal<id> * _Nullable x) {
         [x subscribeNext:^(id  _Nullable x) {
+            //此处打印的是日期 是上一个信号传递过来的
             NSLog(@"%@", x);
         }];
     }];
